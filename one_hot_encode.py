@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 
 train = pd.read_csv("data/train.csv")
-train.replace(-1, np.nan)
+train = train.replace(-1, np.nan)
 
 # preprocess categorical data, give suitable names, handle missing data/-1
 for feature in train.columns:
@@ -13,6 +13,8 @@ for feature in train.columns:
             # one hot encode categorical data
             dummy = pd.get_dummies(train[feature], prefix=feature)
             dummy['id'] = train['id']
+            dummy = dummy.set_index('id')
+            print(dummy.columns)
             dummy.to_csv("data/%s.csv" % feature, mode='w+')
             print("saved one hot encoded %s to %s.csv" % (feature, feature))
         else:
