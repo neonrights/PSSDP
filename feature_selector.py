@@ -1,11 +1,14 @@
 import os
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 from sklearn.feature_selection import RFE
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVR
 
-FOLDER = 'features'
+FOLDER = 'feat'
 
 # lead data set
 train = pd.read_csv('data/train.csv')
@@ -26,7 +29,8 @@ targets = train.target
 
 # get ten best features for random forest
 estimator = RandomForestClassifier(max_depth=3)
-selector = RFE(estimator, 50, verbose=1)
+#estimator = SVR(kernel='rbf',verbose=1) takes too long
+selector = RFE(estimator, 30, verbose=1)
 selector.fit(features, targets)
 
 # make histograms of ten best features
@@ -42,6 +46,8 @@ for f in os.listdir(FOLDER):
 featfile = open("%s/features.txt" % FOLDER, 'w+')
 
 for feature in best_features:
+    print("plotting feature %s" % feature)
+
     featfile.write("%s\n" % feature)
 
     # set bins for category type
@@ -63,14 +69,19 @@ for feature in best_features:
     # create histogram for visual pruning
     fig = plt.figure()
 
-    plt.hist(x.values, bins=bins, alpha=0.5, label='good drivers', normed=True)
-    plt.hist(y.values, bins=bins, alpha=0.5, label='bad drivers', normed=True)
+    plt.hist(x.values, bins=bins, alpha=0.3, label='good drivers', normed=True)
+    plt.hist(y.values, bins=bins, alpha=0.3, label='bad drivers', normed=True)
 
     plt.legend(loc='upper right')
     plt.title(feature)
     
     fig.savefig('%s/%s.png' % (FOLDER, feature))
     plt.close(fig)
+
+print("plotting pairwise chart")
+fig = sns.pairplot(train, vars=best_features, hue='target')
+fig.savefig('%s/pairwise.png' % FOLDER)
+plt.close(fig)
 
 print(list(best_features))
 
