@@ -13,11 +13,12 @@ for feat in cat_features:
         dummy = pd.read_csv('data/%s.csv' % feat)
         train = train.join(dummy.set_index('id'), on='id', how='left', rsuffix='_onehot')
         train = train.drop(feat, axis=1)
+        print("joined feature %s" % feat)
     except IOError:
         print("failed to open file data/%s.csv" % feat)
 
 
-train = train[best_features]
+train = train[['id', 'target'] + best_features].set_index('id')
 train.to_csv('data/p-train.csv')
 
 
